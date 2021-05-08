@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  volumes:
+    - name: dataset
+      hostPath:
+        path: "/tmp/dataset"
+    - name: caching
+      emptyDir: {}
+  containers:
+    - image: nginx:latest
+      name: nginx
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+        periodSeconds: 10
+        failureThreshold: 3
+      resources:
+        requests:
+          cpu: "500m"      # half a CPU free
+          memory: "128Mi"  # 128 MB        
+        limits:
+          cpu: "1000m"     # 1.0 CPU free
+          memory: "256Mi"  # 256 MB
+      volumeMounts:
+        - mountPath: "/data"
+          name: dataset
+        - mountPath: "/cache"
+          name: caching
